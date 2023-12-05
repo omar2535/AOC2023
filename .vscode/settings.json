@@ -4,6 +4,7 @@
     "editor.insertSpaces": true,
     "editor.detectIndentation": false,
     "rust-analyzer.linkedProjects": [
-        "./Cargo.toml"
+      "./Cargo.toml",
+      "./Cargo.toml"
     ],
 }

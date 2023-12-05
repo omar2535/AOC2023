@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 
-
+#[allow(dead_code)]
 pub fn parttwo() {
   let file = File::open("./data/day1.txt").unwrap();
   let reader = BufReader::new(file);

@@ -1,6 +1,7 @@
 mod day1;
 mod day2;
+mod day3;
 
 fn main() {
-  day2::part2::p2();
+  println!("Run the tests!");
 }

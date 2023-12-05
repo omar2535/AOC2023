@@ -2,6 +2,7 @@ use std::fs::File;
 use std::collections::HashMap;
 use std::io::{prelude::*, BufReader};
 
+#[allow(dead_code)]
 pub fn p2() {
   let file = File::open("./data/day2.txt").unwrap();
   let reader = BufReader::new(file);
