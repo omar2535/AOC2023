@@ -3,5 +3,6 @@ mod day2;
 mod day3;
 
 fn main() {
-  println!("Run the tests!");
+  println!("---Running Advent Of Code 2023 for Omar---");
+  day3::part1::p1();
 }
