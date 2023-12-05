@@ -1,5 +1,4 @@
 use std::fs::File;
-use std::collections::HashMap;
 use std::io::{prelude::*, BufReader};
 
 struct Number {
@@ -14,7 +13,8 @@ struct Coordinate {
   y: usize
 }
 
-pub fn p1() {
+#[allow(dead_code)]
+pub fn run() {
   let file = File::open("./data/day3_input.txt").unwrap();
   let reader = BufReader::new(file);
 
@@ -152,6 +152,6 @@ mod tests {
 
   #[test]
   fn day3part1() {
-      p1();
+      run();
   }
 }
