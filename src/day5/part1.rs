@@ -37,6 +37,8 @@ pub fn run() {
     // If the line number is 1, parse the seeds
     if index == 0 {
       seeds = parsers::parse_numbers_after_substring(&cur_line, String::from("seeds: "), ' ');
+      index += 1;
+      continue;
     }
 
     // if line contains the word map, map each line until the next line is the word map into
