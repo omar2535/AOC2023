@@ -1,7 +1,7 @@
 // parser utilities
 
 // Parses numbers after a substring
-pub fn parse_numbers_after_substring(input_string: String, substring: String, numbers_delim: char) -> Vec<usize> {
+pub fn parse_numbers_after_substring(input_string: &String, substring: String, numbers_delim: char) -> Vec<usize> {
   let search_start_index: usize = input_string.find(&substring).unwrap() + substring.len(); 
   let string_search_space: String = input_string.chars().skip(search_start_index).take(input_string.len() - substring.len()).collect();
 
@@ -30,7 +30,19 @@ mod tests {
     
     let expected: Vec<usize> = vec![79, 14, 55, 13];
 
-    let res: Vec<usize> = parse_numbers_after_substring(input_string, substring, delim);
+    let res: Vec<usize> = parse_numbers_after_substring(&input_string, substring, delim);
+    assert_eq!(expected, res);
+  }
+
+  #[test]
+  fn test_parse_numbers_with_empty_substr() {
+    let input_string: String = String::from("79 14 55 13");
+    let substring: String = String::from("");
+    let delim: char = ' ';
+    
+    let expected: Vec<usize> = vec![79, 14, 55, 13];
+
+    let res: Vec<usize> = parse_numbers_after_substring(&input_string, substring, delim);
     assert_eq!(expected, res);
   }
 }
