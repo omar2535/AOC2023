@@ -156,8 +156,9 @@ mod tests {
   use super::*;
 
   #[test]
-  fn day5part1() {
-      run();
+  fn day5part1r() {
+    println!("Running!");
+    run();
   }
 }
  

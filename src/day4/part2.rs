@@ -69,7 +69,7 @@ fn parse_into_array_of_u32(number_set: &str) -> Vec<u32> {
       Ok(n) => {
         number_set_vec.push(n);
       },
-      Err(e) => (),
+      Err(_e) => (),
     };
   }
   return number_set_vec;

@@ -12,7 +12,7 @@ pub fn parse_numbers_after_substring(input_string: &String, substring: String, n
       Ok(n) => {
         number_set_vec.push(n);
       },
-      Err(e) => (),
+      Err(_e) => (),
     };
   }
   return number_set_vec;
