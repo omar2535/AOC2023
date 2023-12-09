@@ -5,7 +5,7 @@ use super::super::utils::parsers;
 
 #[allow(dead_code)]
 pub fn run() {
-  let file = File::open("./data/day5_input.txt").unwrap();
+  let file = File::open("./data/day5_test.txt").unwrap();
   let reader = BufReader::new(file);
   
 
@@ -156,9 +156,8 @@ mod tests {
   use super::*;
 
   #[test]
-  fn day5part1r() {
+  fn day5part1() {
     println!("Running!");
     run();
   }
 }
- 
