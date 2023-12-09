@@ -5,7 +5,7 @@ use super::super::utils::parsers;
 
 #[allow(dead_code)]
 pub fn run() {
-  let file = File::open("./data/day5_test.txt").unwrap();
+  let file = File::open("./data/day5_input.txt").unwrap();
   let reader = BufReader::new(file);
   
 
@@ -32,6 +32,7 @@ pub fn run() {
       Some(line) => line.unwrap(),
       None => {should_stop = true; String::from(" ")},
     };
+
     println!("{}", cur_line);
 
     // If the line number is 1, parse the seeds
@@ -66,12 +67,88 @@ pub fn run() {
     // update the index
     index += 1;
   }
+
+  let mut min_location = std::usize::MAX;
+  for seed_num in &seeds {
+    let location_num = convert_seed_to_location(
+      *seed_num,
+      &seed_to_soil_map,
+      &soil_to_fertilizer_map,
+      &fertilizer_to_water_map,
+      &water_to_light_map,
+      &light_to_temperature_map,
+      &temperature_to_humidity_map,
+      &humidity_to_location_map
+    );
+
+    if location_num <= min_location {
+      min_location = location_num;
+    }
+  }
+
+  println!("Seeds: {:?}", seeds);
+  println!("Minimum location number: {}", min_location);
   println!("Done at index: {}!", index);
 }
 
 // adds to the map given by the reference
 fn add_to_map(line: &String, map: &mut HashMap<usize, usize>) {
-  // TODO
+  let numbers: Vec<usize> = parsers::parse_numbers_after_substring(line, String::from(""), ' ');
+  if numbers.len() == 0 {
+    return;
+  }
+
+  let dst_range_start: usize = numbers[0];
+  let src_range_start: usize = numbers[1];
+  let range_length: usize = numbers[2];
+
+  for index in 0..range_length {
+    if map.contains_key(&(src_range_start + index)) {
+      panic!("Should not have a duplicate key! {}", src_range_start + index);
+    }
+    map.insert(src_range_start + index, dst_range_start + index);
+  }
+}
+
+// get the seed from a location
+fn convert_seed_to_location(seed_num: usize,
+                            seed_to_soil_map: &HashMap<usize, usize>,
+                            soil_to_fertilizer_map: &HashMap<usize, usize>,
+                            fertilizer_to_water_map: &HashMap<usize, usize>,
+                            water_to_light_map: &HashMap<usize, usize>,
+                            light_to_temperature_map: &HashMap<usize, usize>,
+                            temperature_to_humidity_map: &HashMap<usize, usize>,
+                            humidity_to_location_map: &HashMap<usize, usize>) -> usize {
+  println!("Seed number: {}", seed_num);
+  let soil_num: usize = match seed_to_soil_map.get(&seed_num) {
+    Some(soil_num) => *soil_num,
+    None => seed_num
+  };
+  let fertilizer_num: usize = match soil_to_fertilizer_map.get(&soil_num) {
+    Some(fertilizer_num) => *fertilizer_num,
+    None => soil_num
+  };
+  let water_num: usize = match fertilizer_to_water_map.get(&fertilizer_num) {
+    Some(water_num) => *water_num,
+    None => fertilizer_num
+  };
+  let light_num: usize = match water_to_light_map.get(&water_num) {
+    Some(light_num) => *light_num,
+    None => water_num
+  };
+  let temperature_num: usize = match light_to_temperature_map.get(&light_num) {
+    Some(temperature_num) => *temperature_num,
+    None => light_num
+  };
+  let humidity_num: usize = match temperature_to_humidity_map.get(&temperature_num) {
+    Some(humidity_num) => *humidity_num,
+    None => temperature_num
+  };
+  let location_num: usize = match humidity_to_location_map.get(&humidity_num) {
+    Some(location_num) => *location_num,
+    None => humidity_num
+  };
+  return location_num;
 }
 
 #[cfg(test)]
@@ -79,7 +156,8 @@ mod tests {
   use super::*;
 
   #[test]
-  fn day3part1() {
+  fn day5part1() {
       run();
   }
 }
+ 
