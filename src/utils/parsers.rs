@@ -1,4 +1,6 @@
 // parser utilities
+#[allow(dead_code)]
+
 
 // Parses numbers after a substring
 pub fn parse_numbers_after_substring(input_string: &String, substring: String, numbers_delim: char) -> Vec<usize> {
@@ -9,6 +11,24 @@ pub fn parse_numbers_after_substring(input_string: &String, substring: String, n
   let mut number_set_vec: Vec<usize> = Vec::new();
   for number in numbers {
     match number.parse::<usize>() {
+      Ok(n) => {
+        number_set_vec.push(n);
+      },
+      Err(_e) => (),
+    };
+  }
+  return number_set_vec;
+}
+
+// Parses numbers after a substring
+pub fn parse_numbers_after_substring_isize(input_string: &String, substring: String, numbers_delim: char) -> Vec<isize> {
+  let search_start_index: usize = input_string.find(&substring).unwrap() + substring.len(); 
+  let string_search_space: String = input_string.chars().skip(search_start_index).take(input_string.len() - substring.len()).collect();
+
+  let numbers = string_search_space.split(numbers_delim);
+  let mut number_set_vec: Vec<isize> = Vec::new();
+  for number in numbers {
+    match number.parse::<isize>() {
       Ok(n) => {
         number_set_vec.push(n);
       },

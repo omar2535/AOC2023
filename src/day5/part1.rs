@@ -1,24 +1,32 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 use super::super::utils::parsers;
 
+
+// Look up map
+// Given a src number, we can calculate the dst number by:
+// src_num + dst_src_diff
+struct Mapper {
+  src_min: isize,
+  src_max: isize,
+  dst_src_diff: isize // this should be calculated via dst_min - src_min
+}
+
 #[allow(dead_code)]
 pub fn run() {
-  let file = File::open("./data/day5_test.txt").unwrap();
+  let file = File::open("./data/day5_input.txt").unwrap();
   let reader = BufReader::new(file);
   
 
   // variables to keep track of
-  let mut seeds: Vec<usize> = Vec::new();
-  let mut seed_to_soil_map: HashMap<usize, usize> = HashMap::new();
-  let mut soil_to_fertilizer_map: HashMap<usize, usize> = HashMap::new();
-  let mut fertilizer_to_water_map: HashMap<usize, usize> = HashMap::new();
-  let mut water_to_light_map: HashMap<usize, usize> = HashMap::new();
-  let mut light_to_temperature_map: HashMap<usize, usize> = HashMap::new();
-  let mut temperature_to_humidity_map: HashMap<usize, usize> = HashMap::new();
-  let mut humidity_to_location_map: HashMap<usize, usize> = HashMap::new();
-
+  let mut seeds: Vec<isize> = Vec::new();
+  let mut seed_to_soil_maps: Vec<Mapper> = Vec::new();
+  let mut soil_to_fertizlier_maps: Vec<Mapper> = Vec::new();
+  let mut fertilizer_to_water_maps: Vec<Mapper> = Vec::new();
+  let mut water_to_light_maps: Vec<Mapper> = Vec::new();
+  let mut light_to_temperature_maps: Vec<Mapper> = Vec::new();
+  let mut temperature_to_humidity_maps: Vec<Mapper> = Vec::new();
+  let mut humidity_to_location_maps: Vec<Mapper> = Vec::new();
 
   // first pass, read all the numbers and collect information about them
   let mut lines = reader.lines().peekable();
@@ -28,7 +36,7 @@ pub fn run() {
 
   while !should_stop {
     // get the line
-    let cur_line: String = match lines.next() {
+    let cur_line: String = match lines.next() { 
       Some(line) => line.unwrap(),
       None => {should_stop = true; String::from(" ")},
     };
@@ -37,7 +45,7 @@ pub fn run() {
 
     // If the line number is 1, parse the seeds
     if index == 0 {
-      seeds = parsers::parse_numbers_after_substring(&cur_line, String::from("seeds: "), ' ');
+      seeds = parsers::parse_numbers_after_substring_isize(&cur_line, String::from("seeds: "), ' ');
       index += 1;
       continue;
     }
@@ -52,13 +60,13 @@ pub fn run() {
         // do nothing with current line if it was empty
       } else {
         match map_iter {
-          1 => add_to_map(&cur_line, &mut seed_to_soil_map),
-          2 => add_to_map(&cur_line, &mut soil_to_fertilizer_map),
-          3 => add_to_map(&cur_line, &mut fertilizer_to_water_map),
-          4 => add_to_map(&cur_line, &mut water_to_light_map),
-          5 => add_to_map(&cur_line, &mut light_to_temperature_map),
-          6 => add_to_map(&cur_line, &mut temperature_to_humidity_map),
-          7 => add_to_map(&cur_line, &mut humidity_to_location_map),
+          1 => parse_into_map_vec(&cur_line, &mut seed_to_soil_maps),
+          2 => parse_into_map_vec(&cur_line, &mut soil_to_fertizlier_maps),
+          3 => parse_into_map_vec(&cur_line, &mut fertilizer_to_water_maps),
+          4 => parse_into_map_vec(&cur_line, &mut water_to_light_maps),
+          5 => parse_into_map_vec(&cur_line, &mut light_to_temperature_maps),
+          6 => parse_into_map_vec(&cur_line, &mut temperature_to_humidity_maps),
+          7 => parse_into_map_vec(&cur_line, &mut humidity_to_location_maps),
           _ => panic!("Should not have an map iter that isn't in range! {}", map_iter),
         }
       }
@@ -68,17 +76,17 @@ pub fn run() {
     index += 1;
   }
 
-  let mut min_location = std::usize::MAX;
+  let mut min_location = std::isize::MAX;
   for seed_num in &seeds {
     let location_num = convert_seed_to_location(
       *seed_num,
-      &seed_to_soil_map,
-      &soil_to_fertilizer_map,
-      &fertilizer_to_water_map,
-      &water_to_light_map,
-      &light_to_temperature_map,
-      &temperature_to_humidity_map,
-      &humidity_to_location_map
+      &seed_to_soil_maps,
+      &soil_to_fertizlier_maps,
+      &fertilizer_to_water_maps,
+      &water_to_light_maps,
+      &light_to_temperature_maps,
+      &temperature_to_humidity_maps,
+      &humidity_to_location_maps
     );
 
     if location_num <= min_location {
@@ -92,64 +100,69 @@ pub fn run() {
 }
 
 // adds to the map given by the reference
-fn add_to_map(line: &String, map: &mut HashMap<usize, usize>) {
-  let numbers: Vec<usize> = parsers::parse_numbers_after_substring(line, String::from(""), ' ');
+fn parse_into_map_vec(line: &String, maps: &mut Vec<Mapper>) {
+  let numbers: Vec<isize> = parsers::parse_numbers_after_substring_isize(line, String::from(""), ' ');
   if numbers.len() == 0 {
     return;
   }
 
-  let dst_range_start: usize = numbers[0];
-  let src_range_start: usize = numbers[1];
-  let range_length: usize = numbers[2];
+  let dst_range_start: isize = numbers[0];
+  let src_range_start: isize = numbers[1];
+  let range_length: isize = numbers[2];
 
-  for index in 0..range_length {
-    if map.contains_key(&(src_range_start + index)) {
-      panic!("Should not have a duplicate key! {}", src_range_start + index);
+  // calculate some other numbers
+  let src_range_end: isize = src_range_start + range_length - 1;
+  let dst_src_diff: isize = dst_range_start - src_range_start;
+
+  // create the mapper
+  let mapper: Mapper = Mapper {
+    src_min: src_range_start,
+    src_max: src_range_end,
+    dst_src_diff: dst_src_diff
+  };
+
+  // add it to the vector
+  maps.push(mapper);
+}
+
+// searches a map, gets the next number
+fn get_mapped_number(src_num: isize, maps: &Vec<Mapper>) -> isize {
+  for mapper in maps {
+    if src_num <= mapper.src_max && src_num >= mapper.src_min {
+      return src_num + mapper.dst_src_diff
     }
-    map.insert(src_range_start + index, dst_range_start + index);
   }
+  // If not in a map, just return the source number
+  return src_num;
 }
 
 // get the seed from a location
-fn convert_seed_to_location(seed_num: usize,
-                            seed_to_soil_map: &HashMap<usize, usize>,
-                            soil_to_fertilizer_map: &HashMap<usize, usize>,
-                            fertilizer_to_water_map: &HashMap<usize, usize>,
-                            water_to_light_map: &HashMap<usize, usize>,
-                            light_to_temperature_map: &HashMap<usize, usize>,
-                            temperature_to_humidity_map: &HashMap<usize, usize>,
-                            humidity_to_location_map: &HashMap<usize, usize>) -> usize {
+fn convert_seed_to_location(seed_num: isize,
+                            seed_to_soil_maps: &Vec<Mapper>,
+                            soil_to_fertilizer_maps: &Vec<Mapper>,
+                            fertilizer_to_water_maps: &Vec<Mapper>,
+                            water_to_light_maps: &Vec<Mapper>,
+                            light_to_temperature_maps: &Vec<Mapper>,
+                            temperature_to_humidity_maps: &Vec<Mapper>,
+                            humidity_to_location_maps: &Vec<Mapper>) -> isize {
   println!("Seed number: {}", seed_num);
-  let soil_num: usize = match seed_to_soil_map.get(&seed_num) {
-    Some(soil_num) => *soil_num,
-    None => seed_num
-  };
-  let fertilizer_num: usize = match soil_to_fertilizer_map.get(&soil_num) {
-    Some(fertilizer_num) => *fertilizer_num,
-    None => soil_num
-  };
-  let water_num: usize = match fertilizer_to_water_map.get(&fertilizer_num) {
-    Some(water_num) => *water_num,
-    None => fertilizer_num
-  };
-  let light_num: usize = match water_to_light_map.get(&water_num) {
-    Some(light_num) => *light_num,
-    None => water_num
-  };
-  let temperature_num: usize = match light_to_temperature_map.get(&light_num) {
-    Some(temperature_num) => *temperature_num,
-    None => light_num
-  };
-  let humidity_num: usize = match temperature_to_humidity_map.get(&temperature_num) {
-    Some(humidity_num) => *humidity_num,
-    None => temperature_num
-  };
-  let location_num: usize = match humidity_to_location_map.get(&humidity_num) {
-    Some(location_num) => *location_num,
-    None => humidity_num
-  };
+  let soil_num: isize = get_mapped_number(seed_num, seed_to_soil_maps);
+  let fertilizer_num: isize = get_mapped_number(soil_num, soil_to_fertilizer_maps);
+  let water_num: isize = get_mapped_number(fertilizer_num, fertilizer_to_water_maps);
+  let light_num: isize = get_mapped_number(water_num, water_to_light_maps);
+  let temperature_num: isize = get_mapped_number(light_num, light_to_temperature_maps);
+  let humidity_num: isize = get_mapped_number(temperature_num, temperature_to_humidity_maps);
+  let location_num: isize = get_mapped_number(humidity_num, humidity_to_location_maps);
+
   return location_num;
 }
+
+
+// I want a function that calculates the mapping of a seec to soil dynamically
+// Create a new map of all the ranges, evaluate if the number is in the range, return the new number
+
+
+
 
 #[cfg(test)]
 mod tests {
