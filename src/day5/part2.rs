@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 use super::super::utils::parsers;
@@ -80,8 +82,8 @@ pub fn run() {
     index += 1;
   }
 
-  let mut min_location = std::isize::MAX;
-  for i in 0..=1000 {
+  let min_location = std::isize::MAX;
+  for _i in 0..=1000 {
     
   }
 
@@ -174,12 +176,14 @@ fn get_lowest_map(maps: &Vec<Mapper>) -> usize {
   }
 
   let mut lowest_dst: isize = std::isize::MAX;
+  let mut lowest_index: usize = 0;
   for (index, mapper) in maps.iter().enumerate() {
     if mapper.dst_min < lowest_dst {
-      return index;
+      lowest_index = index;
+      lowest_dst = mapper.dst_min;
     }
   }
-  panic!("Should not get here!");
+  return lowest_index;
 }
 
 #[cfg(test)]
