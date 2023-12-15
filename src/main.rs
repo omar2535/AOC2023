@@ -8,5 +8,5 @@ mod utils;
 
 fn main() {
   println!("---Running Advent Of Code 2023 for Omar---");
-  day6::part1::run();
+  day6::part2::run();
 }
